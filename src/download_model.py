@@ -71,14 +71,21 @@ if __name__ == "__main__":
     setup_env()
     cache_dir = os.getenv("HF_HOME")
     model_name, model_revision = os.getenv("MODEL_NAME"), os.getenv("MODEL_REVISION") or None
+    lora_name_1, lora_name_2, lora_name_3 = os.getenv("LORA_NAME_1"), os.getenv("LORA_NAME_2"), os.getenv("LORA_NAME_3")
     tokenizer_name, tokenizer_revision = os.getenv("TOKENIZER_NAME") or model_name, os.getenv("TOKENIZER_REVISION") or model_revision
    
-    model_path = download(model_name, model_revision, "model", cache_dir)   
+    model_path = download(model_name, model_revision, "model", cache_dir)
+    lora_path_1 = download(lora_name_1, None, "model", cache_dir)
+    lora_path_2 = download(lora_name_2, None, "model", cache_dir)
+    lora_path_3 = download(lora_name_3, None, "model", cache_dir)
   
     metadata = {
         "MODEL_NAME": model_path,
         "MODEL_REVISION": os.getenv("MODEL_REVISION"),
         "QUANTIZATION": os.getenv("QUANTIZATION"),
+        "LORA_NAME_1": lora_path_1,
+        "LORA_NAME_2": lora_path_2,
+        "LORA_NAME_3": lora_path_3,
     }   
     
     # if os.getenv("TENSORIZE") == "1": TODO: Add back once tensorizer is ready
