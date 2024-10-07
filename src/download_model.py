@@ -5,6 +5,8 @@ import glob
 from shutil import rmtree
 from huggingface_hub import snapshot_download
 from utils import timer_decorator
+from peft import PeftModel
+from tokenizers import AutoTokenizer
 
 BASE_DIR = "/" 
 TOKENIZER_PATTERNS = [["*.json", "tokenizer*"]]
@@ -78,11 +80,23 @@ if __name__ == "__main__":
     lora_path_1 = download(lora_name_1, None, "model", cache_dir)
     lora_path_2 = download(lora_name_2, None, "model", cache_dir)
     lora_path_3 = download(lora_name_3, None, "model", cache_dir)
-  
+    lora_names = [lora_path_1, lora_path_2, lora_path_3]
+
+    model = PeftModel.from_pretrained(model_path, lora_names[0], adapter_name=lora_names[0])
+    tokenizer = AutoTokenizer.from_pretrained(model_path)
+    model.load_adapter(lora_path_1, lora_path_1)
+    model.load_adapter(lora_path_2, lora_path_2)
+    model.load_adapter(lora_path_3, lora_path_3)
+    model.add_weighted_adapter(lora_names, [1] * len(lora_names), "__merged")
+    model.set_adapter("__merged")
+    model.save_pretrained("__merged")
+    tokenizer.save_pretrained("__merged")
+    
     metadata = {
         "MODEL_NAME": model_path,
         "MODEL_REVISION": os.getenv("MODEL_REVISION"),
         "QUANTIZATION": os.getenv("QUANTIZATION"),
+        "LORA_NAME_MERGED": "__merged",
         "LORA_NAME_1": lora_path_1,
         "LORA_NAME_2": lora_path_2,
         "LORA_NAME_3": lora_path_3,
